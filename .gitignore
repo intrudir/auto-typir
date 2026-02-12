@@ -128,3 +128,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Text files (passwords, URLs, input files)
+*.txt
