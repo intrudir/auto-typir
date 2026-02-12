@@ -20,6 +20,9 @@ python3 auto-typir.py --text "MyP@ssw0rd!"
 
 # Pull directly from 1Password (no files needed)
 python3 auto-typir.py --op "op://Personal/VDI Login/password"
+
+# Type whatever's in your clipboard
+python3 auto-typir.py -c
 ```
 
 ## 1Password Integration
@@ -54,11 +57,11 @@ python3 auto-typir.py --op "op://Work Vault/Client VDI/password" --op-account wo
 | `--text` | `-t` | Type literal text instead of from file |
 | `--op` | `-o` | Read secret from 1Password (`op://vault/item/field`) |
 | `--op-account` | | 1Password account shorthand (multi-account) |
+| `--clipboard` | `-c` | Read from clipboard and type it out |
 | `--delay` | `-d` | Seconds before typing starts (default: 5) |
 | `--interval` | `-i` | Delay between keystrokes in seconds (default: 0) |
-| `--chunk` | `-c` | Pause every N characters (large files) |
+| `--chunk` | | Pause every N characters (large files) |
 | `--chunk-delay` | | Seconds to pause between chunks (default: 1) |
-| `--clipboard` | `-C` | Use clipboard paste instead of typing |
 | `--no-newline` | `-n` | Don't add newline at end |
 | `--dry-run` | | Preview without typing |
 
@@ -69,6 +72,9 @@ python3 auto-typir.py --op "op://Work Vault/Client VDI/password" --op-account wo
 ```bash
 # From 1Password (recommended)
 python3 auto-typir.py --op "op://Work/Client Portal/password"
+
+# From clipboard
+python3 auto-typir.py -c
 
 # From file
 python3 auto-typir.py client_pass.txt
@@ -102,14 +108,6 @@ python3 auto-typir.py large.b64 --chunk 500 --chunk-delay 2
 
 # Both (very slow VDI)
 python3 auto-typir.py large.b64 --interval 0.02 --chunk 500 --chunk-delay 3
-```
-
-### Clipboard Mode
-
-If the VDI allows paste but not file transfer, clipboard mode is much faster:
-
-```bash
-python3 auto-typir.py payload.b64 --clipboard
 ```
 
 ## Aborting

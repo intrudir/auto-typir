@@ -110,28 +110,6 @@ def type_text(text: str, interval: float = 0.0, chunk_size: int = 0, chunk_delay
     print("\n\n✅ Done!")
 
 
-def clipboard_paste(text: str):
-    """Copy text to clipboard and paste it."""
-    try:
-        import pyperclip
-    except ImportError:
-        print("ERROR: pyperclip not installed. Run: pip install pyperclip")
-        print("       Or use typing mode (remove --clipboard flag)")
-        sys.exit(1)
-    
-    print(f"📋 Copying {len(text)} characters to clipboard...")
-    pyperclip.copy(text)
-    
-    print("📝 Pasting...")
-    # Cmd+V on Mac, Ctrl+V elsewhere
-    if sys.platform == "darwin":
-        pyautogui.hotkey('command', 'v')
-    else:
-        pyautogui.hotkey('ctrl', 'v')
-    
-    print("✅ Done!")
-
-
 def main():
     parser = argparse.ArgumentParser(
         description="Type text into locked-down VDIs when clipboard is disabled.",
@@ -150,11 +128,11 @@ Examples:
   # Quick 3 second countdown
   python3 auto-typir.py input.txt --delay 3
   
-  # Use clipboard paste instead of typing (if paste works)
-  python3 auto-typir.py input.txt --clipboard
-  
   # Type literal text instead of from file
   python3 auto-typir.py --text "MyP@ssw0rd!"
+  
+  # Type whatever is in your clipboard
+  python3 auto-typir.py --clipboard
   
   # 1Password integration - type password directly from vault
   python3 auto-typir.py --op "op://Personal/VDI Login/password"
@@ -170,16 +148,16 @@ Examples:
                         help="Read from 1Password (e.g., op://vault/item/password)")
     parser.add_argument("--op-account", metavar="ACCOUNT",
                         help="1Password account shorthand (for multi-account setups)")
+    parser.add_argument("--clipboard", "-c", action="store_true",
+                        help="Read text from clipboard and type it out")
     parser.add_argument("--delay", "-d", type=int, default=5,
                         help="Seconds before typing starts (default: 5)")
     parser.add_argument("--interval", "-i", type=float, default=0.0,
                         help="Delay between keystrokes in seconds (default: 0)")
-    parser.add_argument("--chunk", "-c", type=int, default=0,
+    parser.add_argument("--chunk", type=int, default=0,
                         help="Pause every N characters (good for large files)")
     parser.add_argument("--chunk-delay", type=float, default=1.0,
                         help="Seconds to pause between chunks (default: 1)")
-    parser.add_argument("--clipboard", "-C", action="store_true",
-                        help="Use clipboard paste instead of typing")
     parser.add_argument("--no-newline", "-n", action="store_true",
                         help="Don't add newline at end (default adds one)")
     parser.add_argument("--dry-run", action="store_true",
@@ -192,6 +170,17 @@ Examples:
         print(f"🔐 Reading from 1Password: {args.op}")
         text = read_from_1password(args.op, args.op_account)
         print("   ✓ Secret retrieved")
+    elif args.clipboard:
+        try:
+            import pyperclip
+        except ImportError:
+            print("ERROR: pyperclip not installed. Run: pip install pyperclip")
+            sys.exit(1)
+        text = pyperclip.paste()
+        if not text:
+            print("ERROR: Clipboard is empty")
+            sys.exit(1)
+        print(f"📋 Read {len(text)} characters from clipboard")
     elif args.text:
         text = args.text
     elif args.file:
@@ -230,21 +219,15 @@ Examples:
     
     # Countdown
     print(f"\n🎯 Ready to type {len(text)} characters")
-    if args.clipboard:
-        print("   Mode: Clipboard paste")
-    else:
-        print(f"   Mode: Typing (interval: {args.interval}s)")
-        if args.chunk > 0:
-            print(f"   Chunking: Every {args.chunk} chars, {args.chunk_delay}s pause")
+    print(f"   Mode: Typing (interval: {args.interval}s)")
+    if args.chunk > 0:
+        print(f"   Chunking: Every {args.chunk} chars, {args.chunk_delay}s pause")
     
     countdown(args.delay)
     
     # Do the thing
     try:
-        if args.clipboard:
-            clipboard_paste(text)
-        else:
-            type_text(text, args.interval, args.chunk, args.chunk_delay)
+        type_text(text, args.interval, args.chunk, args.chunk_delay)
     except pyautogui.FailSafeException:
         print("\n\n⛔ ABORTED - Mouse moved to corner")
         sys.exit(1)
