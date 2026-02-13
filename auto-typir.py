@@ -80,6 +80,9 @@ def type_text(text: str, interval: float = 0.0, chunk_size: int = 0, chunk_delay
     
     print(f"📝 Typing {total} characters...")
     
+    # Small delay before first keystroke to ensure window focus
+    sleep(0.1)
+    
     for i, char in enumerate(text):
         # Handle special keys and characters explicitly
         if char == '\n':
@@ -87,8 +90,11 @@ def type_text(text: str, interval: float = 0.0, chunk_size: int = 0, chunk_delay
         elif char == '\t':
             pyautogui.press('tab')
         elif char.isupper():
-            # Explicitly hold shift for uppercase - fixes first-char timing bug
-            pyautogui.hotkey('shift', char.lower())
+            # Explicit keyDown/keyUp for uppercase - more reliable than hotkey
+            pyautogui.keyDown('shift')
+            sleep(0.01)  # Small delay to ensure shift registers
+            pyautogui.press(char.lower())
+            pyautogui.keyUp('shift')
         else:
             # write() handles most chars including special ones
             pyautogui.write(char, interval=0)
