@@ -51,6 +51,8 @@ def read_from_1password(secret_ref: str, account: str = None) -> str:
 # Disable pyautogui's failsafe (move mouse to corner to abort)
 # We'll handle our own abort logic
 pyautogui.FAILSAFE = True
+# Add small pause between all pyautogui calls to prevent timing issues
+pyautogui.PAUSE = 0.02
 
 
 def countdown(seconds: int) -> bool:
@@ -90,9 +92,8 @@ def type_text(text: str, interval: float = 0.0, chunk_size: int = 0, chunk_delay
         elif char == '\t':
             pyautogui.press('tab')
         elif char.isupper():
-            # Explicit keyDown/keyUp for uppercase - more reliable than hotkey
+            # Explicit keyDown/keyUp for uppercase
             pyautogui.keyDown('shift')
-            sleep(0.01)  # Small delay to ensure shift registers
             pyautogui.press(char.lower())
             pyautogui.keyUp('shift')
         else:
